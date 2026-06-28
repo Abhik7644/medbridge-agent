@@ -1,0 +1,9 @@
+google-adk
+google-generativeai
+pillow
+pytesseract
+python-dotenv
+fastapi
+uvicorn
+chromadb
+requests
