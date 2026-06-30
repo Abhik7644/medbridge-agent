@@ -1,5 +1,5 @@
 from google import genai
-import json, os
+import os, json, time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,41 +9,70 @@ def load_medicine_db():
     with open("data/medicines.json", "r") as f:
         return json.load(f)["medicines"]
 
-def explain_medicine(medicine_name: str, language: str = "English") -> str:
+def get_medicine_context(medicine_name: str) -> str:
+    """[RAG retrieval] Pulls matching medicine info from local knowledge base."""
     db = load_medicine_db()
-    context = ""
     for med in db:
         if (medicine_name.lower() in med["name"].lower() or
             any(medicine_name.lower() in alias.lower() for alias in med["aliases"])):
-            context = f"""
-            Medicine: {med['name']}
-            Use: {med['use']}
-            Side Effects: {med['side_effects']}
-            Simple Explanation: {med['simple_explanation']}
-            Available at Jan Aushadhi: {med['available_at_jan_aushadhi']}
-            """
-            break
+            return (
+                f"Use: {med['use']}. "
+                f"Side Effects: {med['side_effects']}. "
+                f"Available at Jan Aushadhi: {med['available_at_jan_aushadhi']}."
+            )
+    return ""
+
+def explain_and_format_pharmacy(medicine_name: str, language: str, pharmacy_list_text: str) -> dict:
+    """
+    [Explainer Agent]
+    Single combined Gemini call: explains the medicine (RAG-grounded)
+    AND formats real pharmacy data into friendly guidance.
+    Combining these two tasks into one call keeps us under the
+    free-tier daily request quota.
+    """
+    context = get_medicine_context(medicine_name)
 
     prompt = f"""
-    You are a friendly medical assistant explaining medicines to patients 
-    in simple, non-technical language in {language}.
+    Respond in {language}. You are a warm, friendly medical assistant
+    helping a patient who may not have medical education.
 
-    Context from medical database:
-    {context if context else "No exact match found, use general knowledge carefully."}
+    MEDICINE: {medicine_name}
+    Known info: {context if context else "No exact match found — use general medical knowledge carefully."}
 
-    Explain the medicine "{medicine_name}" to a patient who may not have 
-    medical education. Include:
-    1. What it's for (in one simple sentence)
-    2. How to take it (timing with food etc.)
-    3. One important warning
-    4. Whether it's available at Jan Aushadhi store (cheaper govt option)
+    REAL nearby pharmacies found via Google Places:
+    {pharmacy_list_text}
 
-    Keep it under 100 words. Be warm and reassuring.
-    Respond in {language}.
+    Give your answer in exactly two labeled sections:
+
+    EXPLANATION:
+    - What it's for (1 sentence)
+    - How to take it
+    - One important warning
+    - Whether available at Jan Aushadhi (cheap govt store)
+    (under 80 words total)
+
+    PHARMACY:
+    - Recommend which of the listed pharmacies to visit (or general guidance if none listed)
+    - What to tell the pharmacist (mention asking for generic equivalent to save money)
+    (under 80 words total)
     """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    return response.text
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                contents=prompt
+            )
+            text = response.text
+            if "PHARMACY:" in text:
+                explanation, pharmacy = text.split("PHARMACY:", 1)
+                explanation = explanation.replace("EXPLANATION:", "").strip()
+                pharmacy = pharmacy.strip()
+            else:
+                explanation, pharmacy = text.strip(), "Visit pmbjp.gov.in to find your nearest Jan Aushadhi Kendra."
+            return {"explanation": explanation, "pharmacy_info": pharmacy}
+        except Exception as e:
+            if "RESOURCE_EXHAUSTED" in str(e) and attempt < 2:
+                time.sleep(10)
+            else:
+                raise

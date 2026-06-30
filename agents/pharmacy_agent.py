@@ -1,30 +1,18 @@
-from google import genai
-import os
-from dotenv import load_dotenv
+from tools.pharmacy_finder import search_real_pharmacies, format_pharmacy_list
 
-load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-def find_nearby_pharmacies(location: str, medicine_name: str) -> str:
-    prompt = f"""
-    A patient in {location} needs to find "{medicine_name}".
-
-    Provide helpful guidance on:
-    1. How to find the nearest Jan Aushadhi Kendra 
-       (government cheap medicine store) — mention pmbjp.gov.in
-    2. What to tell the pharmacist
-    3. Expected price range for generic vs branded version
-    4. Tip: ask for generic equivalent to save money
-
-    Be practical and specific. Keep under 150 words.
+def get_pharmacy_context(location: str) -> tuple[list, str]:
     """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    return response.text
+    [Pharmacy Agent]
+    Real tool call to Google Places API to find nearby pharmacies.
+    Returns both raw results (for the activity log) and formatted text
+    (for the Explainer Agent's prompt).
+    """
+    pharmacies = search_real_pharmacies(location)
+    formatted = format_pharmacy_list(pharmacies)
+    return pharmacies, formatted
 
 def set_followup_reminder(medicine_name: str, frequency: str) -> str:
+    """Generates a reminder message for the patient."""
     return f"""
     ⏰ REMINDER SET for {medicine_name}
     Frequency: {frequency}

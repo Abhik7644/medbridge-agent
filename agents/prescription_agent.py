@@ -30,7 +30,7 @@ def extract_medicines_from_prescription(image_path: str) -> dict:
     """
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-2.5-flash-lite",
         contents=[prompt, image]
     )
 

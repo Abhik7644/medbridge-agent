@@ -1,0 +1,28 @@
+{
+  "medicines": [
+    {
+      "name": "Paracetamol",
+      "aliases": ["Crocin", "Dolo", "Tylenol"],
+      "use": "Reduces fever and relieves mild to moderate pain",
+      "side_effects": "Rarely causes side effects at normal doses. Avoid alcohol.",
+      "simple_explanation": "This medicine brings down your fever and reduces pain like headache or body ache.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Amoxicillin",
+      "aliases": ["Amoxil", "Novamox"],
+      "use": "Antibiotic for bacterial infections",
+      "side_effects": "May cause nausea, diarrhea, or allergic reaction",
+      "simple_explanation": "This is an antibiotic. It kills the bacteria causing your infection. Complete the full course even if you feel better.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Metformin",
+      "aliases": ["Glycomet", "Glucophage"],
+      "use": "Controls blood sugar in Type 2 diabetes",
+      "side_effects": "May cause stomach upset initially. Take with food.",
+      "simple_explanation": "This medicine helps control your blood sugar levels. Take it with meals.",
+      "available_at_jan_aushadhi": true
+    }
+  ]
+}

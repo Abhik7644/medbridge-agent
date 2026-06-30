@@ -1,5 +1,5 @@
 google-adk
-google-generativeai
+google-genai
 pillow
 pytesseract
 python-dotenv
@@ -7,3 +7,4 @@ fastapi
 uvicorn
 chromadb
 requests
+reportlab
