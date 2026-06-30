@@ -9,7 +9,6 @@ app = FastAPI(title="MedBridge Agent")
 # Simple in-memory store for the last few reports (demo-scale, not production DB)
 REPORT_CACHE: dict[str, dict] = {}
 
-
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return """
