@@ -1,9 +1,12 @@
-import os, json, time
+import os, json, time, re
 from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+PRIMARY_MODEL  = "openai/gpt-oss-120b"
+FALLBACK_MODEL = "qwen/qwen3.6-27b"
 
 def load_medicine_db():
     with open("data/medicines.json", "r") as f:
@@ -22,58 +25,62 @@ def get_medicine_context(medicine_name: str) -> str:
             )
     return ""
 
+def call_groq(prompt: str, model: str) -> str:
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=600,
+        temperature=0.3
+    )
+    return response.choices[0].message.content
+
 def explain_and_format_pharmacy(medicine_name: str, language: str, pharmacy_list_text: str) -> dict:
     """
-    [Explainer Agent]
-    Single Groq call: explains medicine (RAG-grounded) AND
-    formats real pharmacy data into friendly patient guidance.
+    [Explainer Agent] Uses JSON output format for reliable parsing.
+    RAG-grounded explanation + pharmacy guidance in one Groq call.
     """
     context = get_medicine_context(medicine_name)
 
-    prompt = f"""
-    Respond in {language}. You are a warm, friendly medical assistant
-    helping a patient who may not have medical education.
+    prompt = f"""You are a warm friendly medical assistant. Respond in {language}.
 
-    MEDICINE: {medicine_name}
-    Known info: {context if context else "No exact match — use general medical knowledge carefully."}
+MEDICINE: {medicine_name}
+Known info: {context if context else "Use general medical knowledge carefully."}
+Nearby pharmacies: {pharmacy_list_text}
 
-    REAL nearby pharmacies found via Google Places:
-    {pharmacy_list_text}
+Return ONLY a valid JSON object, no markdown, no extra text:
+{{
+  "explanation": "What {medicine_name} is for in 1 sentence. How to take it. One important warning. Whether available at Jan Aushadhi govt store. Under 80 words.",
+  "pharmacy_info": "Which pharmacy to visit or how to find one. What to tell the pharmacist. Mention asking for generic equivalent to save money. Under 80 words."
+}}"""
 
-    Give your answer in exactly two labeled sections:
+    for model in [PRIMARY_MODEL, FALLBACK_MODEL]:
+        for attempt in range(2):
+            try:
+                raw = call_groq(prompt, model)
+                # Strip markdown fences if present
+                raw = re.sub(r"```json|```", "", raw).strip()
+                # Extract JSON object
+                json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+                if json_match:
+                    parsed = json.loads(json_match.group())
+                    return {
+                        "explanation": parsed.get("explanation", "").strip(),
+                        "pharmacy_info": parsed.get("pharmacy_info", "").strip()
+                    }
+                # If JSON parse failed, try splitting on newlines as last resort
+                lines = [l.strip() for l in raw.split('\n') if l.strip()]
+                return {
+                    "explanation": lines[0] if lines else raw,
+                    "pharmacy_info": lines[1] if len(lines) > 1 else "Visit pmbjp.gov.in"
+                }
+            except Exception as e:
+                err = str(e)
+                if "decommissioned" in err or "deprecated" in err:
+                    break  # try fallback model
+                if attempt < 1:
+                    time.sleep(5)
 
-    EXPLANATION:
-    - What it's for (1 sentence)
-    - How to take it
-    - One important warning
-    - Whether available at Jan Aushadhi (cheap govt store)
-    (under 80 words total)
-
-    PHARMACY:
-    - Recommend which listed pharmacy to visit (or general guidance if none listed)
-    - What to tell the pharmacist (mention asking for generic equivalent)
-    (under 80 words total)
-    """
-
-    for attempt in range(3):
-        try:
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=500,
-                temperature=0.3
-            )
-            text = response.choices[0].message.content
-            if "PHARMACY:" in text:
-                explanation, pharmacy = text.split("PHARMACY:", 1)
-                explanation = explanation.replace("EXPLANATION:", "").strip()
-                pharmacy = pharmacy.strip()
-            else:
-                explanation = text.strip()
-                pharmacy = "Visit pmbjp.gov.in to find your nearest Jan Aushadhi Kendra."
-            return {"explanation": explanation, "pharmacy_info": pharmacy}
-        except Exception as e:
-            if attempt < 2:
-                time.sleep(5)
-            else:
-                raise
+    return {
+        "explanation": f"{medicine_name} is a medicine prescribed by your doctor. Please consult your pharmacist for details.",
+        "pharmacy_info": "Visit pmbjp.gov.in or call 1800-180-8080 to find your nearest Jan Aushadhi Kendra."
+    }

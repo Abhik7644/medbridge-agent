@@ -1,48 +1,27 @@
-import googlemaps
-import os
-from dotenv import load_dotenv
+# Maps API removed — replaced with structured static guidance
+# This avoids billing requirements while still giving patients
+# actionable, location-aware pharmacy information.
 
-load_dotenv()
-gmaps = googlemaps.Client(key=os.getenv("MAPS_API_KEY"))
+HELPLINE = "1800-180-8080"
+PMBJP_URL = "pmbjp.gov.in"
 
 def search_real_pharmacies(location: str) -> list:
     """
-    [Tool] Real call to Google Places API — finds actual nearby
-    pharmacies/Jan Aushadhi stores. Returns [] on failure so the
-    agent can gracefully fall back to general guidance.
+    Maps API removed to avoid billing requirement.
+    Returns empty list — guidance handled by format_pharmacy_list.
     """
-    try:
-        geocode_result = gmaps.geocode(location)
-        if not geocode_result:
-            return []
-        lat_lng = geocode_result[0]["geometry"]["location"]
+    return []
 
-        places_result = gmaps.places_nearby(
-            location=lat_lng,
-            radius=3000,
-            keyword="Jan Aushadhi pharmacy medical store",
-            type="pharmacy"
-        )
-
-        pharmacies = []
-        for place in places_result.get("results", [])[:5]:
-            pharmacies.append({
-                "name": place.get("name"),
-                "address": place.get("vicinity"),
-                "rating": place.get("rating", "N/A"),
-                "open_now": place.get("opening_hours", {}).get("open_now", "Unknown")
-            })
-        return pharmacies
-    except Exception as e:
-        print(f"⚠️ [Pharmacy Agent] Maps API error: {e}")
-        return []
-
-
-def format_pharmacy_list(pharmacies: list) -> str:
-    """Converts pharmacy results into plain text for prompting."""
-    if not pharmacies:
-        return "No live pharmacy data available. Suggest checking pmbjp.gov.in for the nearest Jan Aushadhi Kendra."
-    return "\n".join([
-        f"- {p['name']} ({p['address']}) — Rating: {p['rating']}, Open now: {p['open_now']}"
-        for p in pharmacies
-    ])
+def format_pharmacy_list(pharmacies: list, location: str = "") -> str:
+    """
+    Returns structured guidance for finding Jan Aushadhi stores.
+    Location-aware: includes city name in search suggestion.
+    """
+    city = location.split(",")[0].strip() if location else "your city"
+    return (
+        f"No live pharmacy data. Guide patient to:\n"
+        f"1. Visit {PMBJP_URL} → Store Locator → search '{city}'\n"
+        f"2. Search 'Jan Aushadhi Kendra {city}' on Google Maps\n"
+        f"3. Call Jan Aushadhi helpline: {HELPLINE} (free, toll-free)\n"
+        f"4. Ask any pharmacist for the generic equivalent to save 60-90% cost"
+    )

@@ -1,82 +1,103 @@
-import os, json, re, time, base64
-from groq import Groq
-from PIL import Image
+import os, json, re
+import pytesseract
+from PIL import Image, ImageFilter, ImageEnhance
 from dotenv import load_dotenv
-import io
 
 load_dotenv()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def image_to_base64(image_path: str) -> str:
-    """Convert image to base64 string for Groq vision API."""
+# Set Tesseract path for Windows
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+def preprocess_image(image_path: str) -> Image.Image:
+    """
+    Preprocesses prescription image for better OCR accuracy.
+    Converts to grayscale, increases contrast, sharpens.
+    """
     with Image.open(image_path) as img:
-        # Convert to RGB if needed (handles PNG with transparency)
         if img.mode in ("RGBA", "P"):
             img = img.convert("RGB")
-        buffer = io.BytesIO()
-        img.save(buffer, format="JPEG")
-        return base64.b64encode(buffer.getvalue()).decode("utf-8")
+        img = img.convert("L")  # grayscale
+        img = ImageEnhance.Contrast(img).enhance(2.0)
+        img = img.filter(ImageFilter.SHARPEN)
+        return img.copy()
 
 def extract_medicines_from_prescription(image_path: str) -> dict:
     """
     [Prescription Agent]
-    Uses Groq LLaMA Vision to read prescription image and
-    extract structured medicine data.
+    Uses Tesseract OCR (local, no API) to extract raw text
+    from prescription image, then uses Groq to parse it into
+    structured medicine data.
     """
-    image_b64 = image_to_base64(image_path)
+    from groq import Groq
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-    prompt = """
-    You are a medical prescription reader.
-    Extract all medicines from this prescription image.
-    Return ONLY a valid JSON object in this exact format:
-    {
+    # Step 1: Local OCR — extract raw text from image
+    image = preprocess_image(image_path)
+    raw_text = pytesseract.image_to_string(image)
+    print("📝 [Prescription Agent] OCR complete, parsing with Groq...")
+
+    if not raw_text.strip():
+        return {"medicines": [], "doctor_notes": "Could not read prescription image clearly."}
+
+    # Step 2: Groq parses the OCR text into structured JSON
+    prompt = f"""
+    You are a medical prescription parser.
+    Below is raw OCR text extracted from a prescription image.
+    Extract all medicines and return ONLY a valid JSON object.
+
+    OCR TEXT:
+    {raw_text}
+
+    Return ONLY this JSON format, no extra text:
+    {{
         "medicines": [
-            {
+            {{
                 "name": "medicine name",
                 "dosage": "e.g. 500mg",
                 "frequency": "e.g. twice daily",
                 "duration": "e.g. 5 days"
-            }
+            }}
         ],
-        "doctor_notes": "any additional notes"
-    }
-    If you cannot read something clearly, write "unclear".
-    Return ONLY the JSON, no extra text.
+        "doctor_notes": "any additional notes or instructions"
+    }}
+
+    If a field is unclear, write "unclear".
     """
 
     for attempt in range(3):
         try:
             response = client.chat.completions.create(
-                model="llama-3.2-11b-vision-preview",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image_b64}"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "text": prompt
-                            }
-                        ]
-                    }
-                ],
-                max_tokens=1000,
+                model="openai/gpt-oss-120b",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=800,
                 temperature=0.1
             )
             raw = response.choices[0].message.content
-            # Strip markdown code fences if present
             raw = re.sub(r"```json|```", "", raw).strip()
             json_match = re.search(r'\{.*\}', raw, re.DOTALL)
             if json_match:
                 return json.loads(json_match.group())
             return {"medicines": [], "doctor_notes": raw}
         except Exception as e:
+            err = str(e)
+            if ("decommissioned" in err or "deprecated" in err):
+                # try fallback model
+                try:
+                    response = client.chat.completions.create(
+                        model="qwen/qwen3.6-27b",
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=800,
+                        temperature=0.1
+                    )
+                    raw = response.choices[0].message.content
+                    raw = re.sub(r"```json|```", "", raw).strip()
+                    json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+                    if json_match:
+                        return json.loads(json_match.group())
+                except:
+                    pass
             if attempt < 2:
+                import time
                 time.sleep(5)
             else:
                 raise

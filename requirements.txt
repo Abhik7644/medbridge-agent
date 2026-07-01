@@ -1,5 +1,6 @@
 google-adk
 google-genai
+groq
 pillow
 pytesseract
 python-dotenv

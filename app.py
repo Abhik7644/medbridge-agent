@@ -86,16 +86,6 @@ async def analyze(
             oldest_key = next(iter(REPORT_CACHE))
             REPORT_CACHE.pop(oldest_key)
 
-        trace_html = """
-        <div style="background:#1a1a2e;color:#0f0;padding:15px;
-                    border-radius:8px;font-family:monospace;
-                    margin-bottom:20px;font-size:13px;
-                    max-height:250px;overflow-y:auto;">
-        <b>🤖 Agent Activity Log</b><br><br>
-        """
-        for step in result.get("agent_trace", []):
-            trace_html += f"[{step['agent']}] {step['action']} → <b>{step['status']}</b><br>"
-        trace_html += "</div>"
 
         security_html = """
         <p style="background:#fff3cd;padding:10px;border-radius:5px;
@@ -127,7 +117,6 @@ async def analyze(
         <h1>🏥 MedBridge Results</h1>
         {security_html}
         {download_html}
-        {trace_html}
         <p>Found <b>{result['total_medicines']} medicine(s)</b> 
            in your prescription</p>
         """
