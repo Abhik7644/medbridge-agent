@@ -8,7 +8,7 @@ PMBJP_URL = "pmbjp.gov.in"
 def search_real_pharmacies(location: str) -> list:
     """
     Maps API removed to avoid billing requirement.
-    Returns empty list — guidance handled by format_pharmacy_list.
+    Returns empty list — guidance handled by format pharmacy_list.
     """
     return []
 
