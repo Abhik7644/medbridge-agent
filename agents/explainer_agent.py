@@ -13,7 +13,6 @@ def load_medicine_db():
         return json.load(f)["medicines"]
 
 def get_medicine_context(medicine_name: str) -> str:
-    """[RAG retrieval] Pulls matching medicine from local knowledge base."""
     db = load_medicine_db()
     for med in db:
         if (medicine_name.lower() in med["name"].lower() or
@@ -35,52 +34,61 @@ def call_groq(prompt: str, model: str) -> str:
     return response.choices[0].message.content
 
 def explain_and_format_pharmacy(medicine_name: str, language: str, pharmacy_list_text: str) -> dict:
-    """
-    [Explainer Agent] Uses JSON output format for reliable parsing.
-    RAG-grounded explanation + pharmacy guidance in one Groq call.
-    """
     context = get_medicine_context(medicine_name)
 
+    # Use XML-style tags instead of JSON — much more reliable to parse
     prompt = f"""You are a warm friendly medical assistant. Respond in {language}.
 
 MEDICINE: {medicine_name}
 Known info: {context if context else "Use general medical knowledge carefully."}
 Nearby pharmacies: {pharmacy_list_text}
 
-Return ONLY a valid JSON object, no markdown, no extra text:
-{{
-  "explanation": "What {medicine_name} is for in 1 sentence. How to take it. One important warning. Whether available at Jan Aushadhi govt store. Under 80 words.",
-  "pharmacy_info": "Which pharmacy to visit or how to find one. What to tell the pharmacist. Mention asking for generic equivalent to save money. Under 80 words."
-}}"""
+Reply using EXACTLY these two XML tags and nothing else outside them:
+
+<explanation>
+What {medicine_name} is for in 1 simple sentence. How to take it. One important warning. Whether available at Jan Aushadhi govt store. Keep under 80 words. Do NOT use JSON or curly braces.
+</explanation>
+
+<pharmacy>
+How to find this medicine. What to tell the pharmacist. Mention asking for generic equivalent to save 60-90% cost. Keep under 80 words. Do NOT use JSON or curly braces.
+</pharmacy>"""
 
     for model in [PRIMARY_MODEL, FALLBACK_MODEL]:
         for attempt in range(2):
             try:
                 raw = call_groq(prompt, model)
-                # Strip markdown fences if present
-                raw = re.sub(r"```json|```", "", raw).strip()
-                # Extract JSON object
-                json_match = re.search(r'\{.*\}', raw, re.DOTALL)
-                if json_match:
-                    parsed = json.loads(json_match.group())
-                    return {
-                        "explanation": parsed.get("explanation", "").strip(),
-                        "pharmacy_info": parsed.get("pharmacy_info", "").strip()
-                    }
-                # If JSON parse failed, try splitting on newlines as last resort
-                lines = [l.strip() for l in raw.split('\n') if l.strip()]
+
+                # Extract using XML tag parsing — far more reliable than JSON
+                exp_match = re.search(r'<explanation>(.*?)</explanation>', raw, re.DOTALL)
+                pha_match = re.search(r'<pharmacy>(.*?)</pharmacy>', raw, re.DOTALL)
+
+                explanation = exp_match.group(1).strip() if exp_match else ""
+                pharmacy    = pha_match.group(1).strip() if pha_match else ""
+
+                # If tags not found, try splitting on blank line as last resort
+                if not explanation and not pharmacy:
+                    parts = [p.strip() for p in raw.strip().split('\n\n') if p.strip()]
+                    explanation = parts[0] if parts else raw.strip()
+                    pharmacy    = parts[1] if len(parts) > 1 else "Visit pmbjp.gov.in or call 1800-180-8080"
+
+                # Strip any accidental JSON artifacts
+                explanation = re.sub(r'^\s*\{.*?"explanation"\s*:\s*"?', '', explanation, flags=re.DOTALL)
+                explanation = explanation.strip('}"').strip()
+                pharmacy    = pharmacy.strip('}"').strip()
+
                 return {
-                    "explanation": lines[0] if lines else raw,
-                    "pharmacy_info": lines[1] if len(lines) > 1 else "Visit pmbjp.gov.in"
+                    "explanation": explanation or f"{medicine_name} is prescribed by your doctor. Ask your pharmacist for details.",
+                    "pharmacy_info": pharmacy or "Visit pmbjp.gov.in or call Jan Aushadhi helpline 1800-180-8080 (free)."
                 }
+
             except Exception as e:
                 err = str(e)
-                if "decommissioned" in err or "deprecated" in err:
-                    break  # try fallback model
+                if "decommissioned" in err or "deprecated" in err or "model_not_active" in err:
+                    break
                 if attempt < 1:
                     time.sleep(5)
 
     return {
-        "explanation": f"{medicine_name} is a medicine prescribed by your doctor. Please consult your pharmacist for details.",
+        "explanation": f"{medicine_name} is prescribed by your doctor. Please consult your pharmacist for detailed guidance.",
         "pharmacy_info": "Visit pmbjp.gov.in or call 1800-180-8080 to find your nearest Jan Aushadhi Kendra."
     }
