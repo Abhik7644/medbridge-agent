@@ -80,25 +80,34 @@ uvicorn app:app --reload
 ```
 Open http://127.0.0.1:8000 in your browser.
 
-## Project Structure
+## 📁 Project Structure
+
+```text
 medbridge-agent/
-├── app.py                    # FastAPI web server
+│
+├── app.py                      # FastAPI web server
+├── requirements.txt
+│
 ├── agents/
-│   ├── orchestrator.py       # Coordinates all agents
-│   ├── prescription_agent.py # Tesseract OCR + Groq parsing
-│   ├── explainer_agent.py    # RAG + Groq explanations
-│   └── pharmacy_agent.py     # Pharmacy guidance tool
+│   ├── orchestrator.py         # Coordinates all agents
+│   ├── prescription_agent.py   # OCR + Groq parsing
+│   ├── explainer_agent.py      # Medicine explanation
+│   └── pharmacy_agent.py       # Pharmacy guidance
+│
 ├── tools/
-│   ├── pharmacy_finder.py    # Google Places API tool
-│   └── pdf_generator.py      # PDF report generation
+│   ├── pharmacy_finder.py      # Google Places API
+│   └── pdf_generator.py        # PDF report generation
+│
 ├── data/
-│   └── medicines.json        # Local medicine knowledge base
+│   └── medicines.json          # Local medicine knowledge
+│
 ├── static/
-│   └── style.css             # Frontend styles
-├── templates/
-│   ├── home.html             # Upload page
-│   └── results.html          # Results page
-└── requirements.txt
+│   └── style.css               # Frontend styles
+│
+└── templates/
+    ├── home.html               # Upload page
+    └── results.html            # Results page
+```
 
 ## Security
 - Prescription images are processed in-memory only
