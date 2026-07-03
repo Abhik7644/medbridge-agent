@@ -2,26 +2,146 @@
   "medicines": [
     {
       "name": "Paracetamol",
-      "aliases": ["Crocin", "Dolo", "Tylenol"],
-      "use": "Reduces fever and relieves mild to moderate pain",
-      "side_effects": "Rarely causes side effects at normal doses. Avoid alcohol.",
-      "simple_explanation": "This medicine brings down your fever and reduces pain like headache or body ache.",
+      "aliases": ["Crocin", "Dolo", "Tylenol", "Calpol", "Fepanil", "Metacin", "PCT"],
+      "use": "Reduces fever and relieves mild to moderate pain like headache, body ache, toothache",
+      "side_effects": "Very safe at normal doses. Avoid alcohol. Do not exceed 4g/day.",
+      "simple_explanation": "This medicine brings down your fever and reduces pain. It is one of the safest medicines available.",
       "available_at_jan_aushadhi": true
     },
     {
       "name": "Amoxicillin",
-      "aliases": ["Amoxil", "Novamox"],
-      "use": "Antibiotic for bacterial infections",
-      "side_effects": "May cause nausea, diarrhea, or allergic reaction",
-      "simple_explanation": "This is an antibiotic. It kills the bacteria causing your infection. Complete the full course even if you feel better.",
+      "aliases": ["Amoxil", "Novamox", "Wymox", "Trimox", "Amox"],
+      "use": "Antibiotic that kills bacteria causing throat, ear, chest, urinary tract and skin infections",
+      "side_effects": "May cause nausea, diarrhea, or allergic rash. Tell doctor if allergic to penicillin.",
+      "simple_explanation": "This is an antibiotic that kills the bacteria making you sick. Always complete the full course even if you feel better — stopping early can make bacteria resistant.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Levocetirizine",
+      "aliases": ["Levocet", "Xyzal", "L-Cet", "Levorid", "Vozet", "Alerid-L"],
+      "use": "Antihistamine that relieves allergy symptoms — runny nose, sneezing, itchy eyes, skin rashes and hives",
+      "side_effects": "May cause drowsiness. Avoid driving. Do not drink alcohol.",
+      "simple_explanation": "This medicine stops your body's allergic reaction — it will reduce your runny nose, sneezing and itchy eyes. Best taken at night as it can make you sleepy.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Ambrodil",
+      "aliases": ["Ambroxol", "Mucosolvan", "Ambril", "Ambrocet", "Alex", "Ambrolite"],
+      "use": "Expectorant and mucolytic — thins and loosens mucus in the airways making it easier to cough out",
+      "side_effects": "May cause mild nausea or stomach upset. Drink plenty of water.",
+      "simple_explanation": "This syrup loosens the thick mucus stuck in your chest and throat, making it easier to cough it out. Drink warm water alongside for best results.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Pantoprazole",
+      "aliases": ["Pan", "Pantop", "Nupenta", "Pantocid", "Protonix", "Pantodac"],
+      "use": "Proton pump inhibitor — reduces excess stomach acid, treats acidity, GERD, ulcers and protects stomach lining when taking other medicines",
+      "side_effects": "Generally well tolerated. May cause headache or diarrhea rarely.",
+      "simple_explanation": "This medicine reduces the acid your stomach produces. It protects your stomach from the other medicines you are taking and relieves acidity or heartburn.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Azithromycin",
+      "aliases": ["Zithromax", "Azee", "Azithral", "Atm", "Zady", "Azifast"],
+      "use": "Antibiotic for respiratory infections, throat infections, typhoid, and skin infections",
+      "side_effects": "May cause nausea, stomach pain, or diarrhea. Take with food.",
+      "simple_explanation": "This is a powerful antibiotic taken once daily. It stays active in your body for days so even a short course works. Complete all tablets given.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Cetirizine",
+      "aliases": ["Zyrtec", "Cetriz", "Okacet", "Alerid", "Cetzine"],
+      "use": "Antihistamine for allergy symptoms — runny nose, sneezing, hives, itching",
+      "side_effects": "Can cause drowsiness. Avoid driving. Do not drink alcohol.",
+      "simple_explanation": "This allergy medicine reduces sneezing, runny nose, and itching caused by dust, pollen or other allergens. Take at night to avoid daytime sleepiness.",
       "available_at_jan_aushadhi": true
     },
     {
       "name": "Metformin",
-      "aliases": ["Glycomet", "Glucophage"],
-      "use": "Controls blood sugar in Type 2 diabetes",
-      "side_effects": "May cause stomach upset initially. Take with food.",
-      "simple_explanation": "This medicine helps control your blood sugar levels. Take it with meals.",
+      "aliases": ["Glycomet", "Glucophage", "Obimet", "Gluformin", "Walaphage"],
+      "use": "Controls blood sugar levels in Type 2 diabetes by reducing glucose production in the liver",
+      "side_effects": "May cause stomach upset initially. Always take with food. Never skip meals.",
+      "simple_explanation": "This medicine controls your blood sugar. Take it with your meals every day without fail. Never stop it on your own — blood sugar can spike dangerously.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Amlodipine",
+      "aliases": ["Amlopin", "Amlip", "Norvasc", "Stamlo", "Amlong"],
+      "use": "Calcium channel blocker that relaxes blood vessels and lowers blood pressure and treats chest pain",
+      "side_effects": "May cause ankle swelling, flushing or dizziness when standing up quickly.",
+      "simple_explanation": "This medicine relaxes your blood vessels to lower blood pressure. Take it at the same time every day. Do not stop suddenly — always consult your doctor first.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Atorvastatin",
+      "aliases": ["Lipitor", "Atorva", "Aztor", "Storvas", "Tonact"],
+      "use": "Statin that lowers bad cholesterol (LDL) and reduces risk of heart attack and stroke",
+      "side_effects": "Rarely causes muscle pain. Report any unexplained muscle aches to your doctor.",
+      "simple_explanation": "This medicine lowers the bad cholesterol in your blood to protect your heart. Take it at night. Avoid grapefruit juice while on this medicine.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Omeprazole",
+      "aliases": ["Omez", "Prilosec", "Ocid", "Omesec", "Losec"],
+      "use": "Reduces stomach acid production, treats acidity, GERD, peptic ulcers",
+      "side_effects": "Generally safe. Long-term use may affect magnesium or B12 levels.",
+      "simple_explanation": "This capsule reduces the acid in your stomach. Take it 30 minutes before your first meal of the day. It relieves heartburn and acidity.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Ibuprofen",
+      "aliases": ["Brufen", "Combiflam", "Advil", "Nurofen", "Ibugesic"],
+      "use": "Anti-inflammatory painkiller for fever, headache, body ache, dental pain, menstrual cramps and joint pain",
+      "side_effects": "Always take with food — can irritate the stomach. Avoid if you have kidney problems or ulcers.",
+      "simple_explanation": "This medicine reduces pain, swelling and fever. Always take it after eating food to protect your stomach. Do not take on an empty stomach.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Cefixime",
+      "aliases": ["Taxim-O", "Zifi", "Cefiget", "Topcef", "Cefspan"],
+      "use": "Antibiotic for urinary tract infections, throat infections, ear infections and typhoid",
+      "side_effects": "May cause diarrhea, nausea or stomach pain. Complete the full course.",
+      "simple_explanation": "This is a strong antibiotic tablet. Take it at regular intervals every day and complete all the tablets even if you feel better. Stopping early is dangerous.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Dolo",
+      "aliases": ["Dolo 650", "Paracetamol 650", "Crocin 650"],
+      "use": "Reduces fever and relieves mild to moderate pain — same as paracetamol but higher dose",
+      "side_effects": "Safe at normal doses. Do not take more than 4 tablets per day. Avoid alcohol.",
+      "simple_explanation": "Dolo is paracetamol in a higher 650mg dose, commonly used for fever and body pain. Take it after food and drink plenty of water.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Montelukast",
+      "aliases": ["Singulair", "Montair", "Montek", "Romilast"],
+      "use": "Prevents and treats asthma and seasonal allergies by blocking leukotrienes that cause inflammation",
+      "side_effects": "May cause headache or stomach pain. Take at night.",
+      "simple_explanation": "This tablet prevents asthma attacks and reduces allergy symptoms. Take it every night before bed. It works best when taken regularly even when you feel fine.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Vitamin D3",
+      "aliases": ["Calcirol", "D-Rise", "Uprise D3", "Arachitol", "Cholecalciferol"],
+      "use": "Treats and prevents Vitamin D deficiency, supports bone health, immunity and muscle function",
+      "side_effects": "Very safe. Do not take more than prescribed — excess can cause calcium buildup.",
+      "simple_explanation": "This is a Vitamin D supplement to strengthen your bones and immunity. Take it with a fatty meal like milk or after lunch for best absorption.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Combiflam",
+      "aliases": ["Ibuprofen + Paracetamol", "Brufen plus"],
+      "use": "Combination painkiller with ibuprofen and paracetamol for stronger pain and fever relief",
+      "side_effects": "Always take with food. Avoid if you have acidity, kidney problems or ulcers.",
+      "simple_explanation": "This tablet combines two painkillers for stronger relief of fever, headache and body pain. Always take it after eating — never on an empty stomach.",
+      "available_at_jan_aushadhi": true
+    },
+    {
+      "name": "Ranitidine",
+      "aliases": ["Rantac", "Aciloc", "Zinetac", "Histac"],
+      "use": "Reduces stomach acid for treating acidity, heartburn, ulcers and GERD",
+      "side_effects": "Generally well tolerated. May cause headache or constipation rarely.",
+      "simple_explanation": "This medicine reduces acid in your stomach and provides relief from heartburn and acidity. Take it before meals for best effect.",
       "available_at_jan_aushadhi": true
     }
   ]

@@ -40,19 +40,29 @@ def explain_and_format_pharmacy(medicine_name: str, language: str, pharmacy_list
     prompt = f"""You are a warm friendly medical assistant. Respond in {language}.
 
 MEDICINE: {medicine_name}
-Known info: {context if context else "Use general medical knowledge carefully."}
+Medical database info: {context if context else f"No database entry found. Use your medical knowledge to explain {medicine_name} accurately and helpfully."}
 Nearby pharmacies: {pharmacy_list_text}
 
-Reply using EXACTLY these two XML tags and nothing else outside them:
+IMPORTANT: Always give a real, helpful medical explanation. Never say "ask your pharmacist" or "consult your doctor" as the explanation — that is not helpful. Explain what the medicine actually does.
+
+Reply using EXACTLY these two XML tags:
 
 <explanation>
-What {medicine_name} is for in 1 simple sentence. How to take it. One important warning. Whether available at Jan Aushadhi govt store. Keep under 80 words. Do NOT use JSON or curly braces.
+Write 3-4 sentences in simple language a patient can understand:
+- Sentence 1: What {medicine_name} is used for (its main job in the body)
+- Sentence 2: How to take it (timing, with/without food, dose frequency)
+- Sentence 3: One important warning or side effect to watch for
+- Sentence 4: Whether it is available at Jan Aushadhi government pharmacy stores
+Do NOT use JSON. Do NOT use curly braces.
 </explanation>
 
 <pharmacy>
-How to find this medicine. What to tell the pharmacist. Mention asking for generic equivalent to save 60-90% cost. Keep under 80 words. Do NOT use JSON or curly braces.
+Write 2-3 sentences:
+- How to find this medicine (Jan Aushadhi store via pmbjp.gov.in or call 1800-180-8080)
+- What to tell the pharmacist (medicine name and strength)
+- Ask for generic equivalent to save 60-90% compared to branded version
+Do NOT use JSON. Do NOT use curly braces.
 </pharmacy>"""
-
     for model in [PRIMARY_MODEL, FALLBACK_MODEL]:
         for attempt in range(2):
             try:
