@@ -455,10 +455,28 @@ HOME_HTML = """<!DOCTYPE html>
 
 <script>
 function showFile(input) {
-  const name = input.files[0]?.name;
+  const file = input.files[0];
+  if (!file) return;
+
+  // Show file name
   const el = document.getElementById('fileName');
-  if (name) { el.textContent = '✓ ' + name; el.style.display = 'block'; }
+  el.textContent = '✓ ' + file.name;
+  el.style.display = 'block';
+
+  // Show image preview
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const preview = document.getElementById('preview-section');
+    const img = document.getElementById('preview-img');
+    img.src = e.target.result;
+    preview.style.display = 'block';
+
+    // Scroll to preview
+    preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+  reader.readAsDataURL(file);
 }
+
 function showLoading() {
   document.getElementById('loading').classList.add('active');
 }
