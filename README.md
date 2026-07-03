@@ -115,7 +115,3 @@ Agents for Good — Kaggle 5-Day AI Agents Intensive Course 2026
 ## Disclaimer
 This tool is for informational purposes only and does not replace professional medical advice.
 EOF
-
-git add README.md
-git commit -m "docs: add comprehensive README with setup instructions"
-git push origin main
